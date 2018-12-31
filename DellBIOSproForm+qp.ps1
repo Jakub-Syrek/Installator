@@ -1,4 +1,4 @@
-﻿
+
 $ScriptFolder = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 function Restart-PowerShell-Elevated
@@ -481,7 +481,7 @@ $System_Drawing_Size.Width = 104
 $System_Drawing_Size.Height = 24
 $checkBox8.Size = $System_Drawing_Size
 $checkBox8.TabIndex = 9
-$checkBox8.Text = "Instal Verint"
+$checkBox8.Text = "Install Verint"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
 $System_Drawing_Point.Y = 235
@@ -500,7 +500,7 @@ $System_Drawing_Size.Width = 104
 $System_Drawing_Size.Height = 24
 $checkBox7.Size = $System_Drawing_Size
 $checkBox7.TabIndex = 8
-$checkBox7.Text = "Instal QP"
+$checkBox7.Text = "Install QP"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
 $System_Drawing_Point.Y = 204
