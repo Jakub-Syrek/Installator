@@ -324,7 +324,7 @@ $handler_button1_Click=
     }
     if ($checkBox9.Checked)
     {
-         $listBox1.Items.Add( "Checkbox 7 is checked"  );
+         $listBox1.Items.Add( "Checkbox 9 is checked"  );
          UpdateBios ;
     }
 
