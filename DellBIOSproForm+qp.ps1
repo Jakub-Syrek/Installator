@@ -26,6 +26,7 @@ Function  UnblockComponents
         }
 
 
+
 Function InstallDellModules 
         {
          Install-Module -Name DellBIOSProvider -RequiredVersion 2.0.0 ;
@@ -141,6 +142,18 @@ Function InstallCitrix
               $listBox1.Items.Add("Citrix is installed");
             }
         }
+Function Install-SSL-Vpn 
+        {
+         $FileName = $ScriptFolder + "\" + "SslvpnClient.exe"
+         Invoke-Command  -ScriptBlock {
+                                       Start-Process $FileName  -ArgumentList '/silent /verysilent' -Wait 
+                                      }
+         if ((Is-Installed("FortiClient")) -eq $true )
+            {
+              Write-Output "FortiClient is installed"
+              $listBox1.Items.Add("FortiClient is installed");
+            }
+        }
 Function InstallAmazon 
         {
         
@@ -252,6 +265,7 @@ $form1 = New-Object System.Windows.Forms.Form
 $button1 = New-Object System.Windows.Forms.Button
 $listBox1 = New-Object System.Windows.Forms.ListBox
 $DropDownBox = New-Object System.Windows.Forms.ComboBox
+$checkBox10 = New-Object System.Windows.Forms.CheckBox
 $checkBox9 = New-Object System.Windows.Forms.CheckBox
 $checkBox8 = New-Object System.Windows.Forms.CheckBox
 $checkBox7 = New-Object System.Windows.Forms.CheckBox
@@ -263,9 +277,6 @@ $checkBox2 = New-Object System.Windows.Forms.CheckBox
 $checkBox1 = New-Object System.Windows.Forms.CheckBox
 $InitialFormWindowState = New-Object System.Windows.Forms.FormWindowState
 
-$b1= $false
-$b2= $false
-$b3= $false
 
 #----------------------------------------------
 #Generated Event Script Blocks
@@ -325,6 +336,11 @@ $handler_button1_Click=
     if ($checkBox9.Checked)
     {
          $listBox1.Items.Add( "Checkbox 9 is checked"  );
+         Install-SSL-Vpn ;
+    }
+    if ($checkBox10.Checked)
+    {
+         $listBox1.Items.Add( "Checkbox 10 is checked"  );
          UpdateBios ;
     }
 
@@ -351,7 +367,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox6.Checked = $false ;
    $checkBox7.Checked = $false ;
    $checkBox8.Checked = $false ;
-   $checkBox9.Checked = $true ;
+   $checkBox9.Checked = $false ;
+   $checkBox10.Checked = $true ;
    }
 
         if ($Global:project -eq "BD")
@@ -364,8 +381,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox6.Checked = $false ;
    $checkBox7.Checked = $false ;
    $checkBox8.Checked = $false ;
-   $checkBox9.Checked = $true ;
-
+   $checkBox9.Checked = $false ;
+   $checkBox10.Checked = $true ;
    }
  
    if ($Global:project -eq "DB")
@@ -378,7 +395,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox6.Checked = $false ;
    $checkBox7.Checked = $true ;
    $checkBox8.Checked = $false ;
-   $checkBox9.Checked = $true ;
+   $checkBox9.Checked = $false ;
+   $checkBox10.Checked = $true ;
    }
    if ($Global:project -eq "Havi")
   {
@@ -390,7 +408,21 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox6.Checked = $false ;
    $checkBox7.Checked = $false ;
    $checkBox8.Checked = $false ;
+   $checkBox9.Checked = $false ;
+   $checkBox10.Checked = $true ;
+   }
+     if ($Global:project -eq "Sasol")
+  {
+   $checkBox1.Checked = $true ;
+   $checkBox2.Checked = $true ;
+   $checkBox3.Checked = $false ;
+   $checkBox4.Checked = $true ;
+   $checkBox5.Checked = $true ;
+   $checkBox6.Checked = $false ;
+   $checkBox7.Checked = $false ;
+   $checkBox8.Checked = $false ;
    $checkBox9.Checked = $true ;
+   $checkBox10.Checked = $true ;
    }
   }  
  }
@@ -423,7 +455,7 @@ $button1.Text = "Run Script"
 
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
-$System_Drawing_Point.Y = 339
+$System_Drawing_Point.Y = 360
 $button1.Location = $System_Drawing_Point
 $button1.DataBindings.DefaultDataSourceUpdateMode = 0
 $button1.add_Click($handler_button1_Click)
@@ -445,12 +477,12 @@ $listBox1.TabIndex = 3
 
 $form1.Controls.Add($listBox1)
 
-$DropDownBox.Location = New-Object System.Drawing.Size(24,308) 
+$DropDownBox.Location = New-Object System.Drawing.Size(24,329) 
 $DropDownBox.Size = New-Object System.Drawing.Size(180,20) 
 $DropDownBox.DropDownHeight = 200 
 
 
-$Projects=@("Alstom","BD","DB" ,"Havi")
+$Projects=@("Alstom","BD","DB" ,"Havi","Sasol")
 
 foreach ($Project in $Projects) {
                       $DropDownBox.Items.Add($Project)
@@ -459,13 +491,32 @@ foreach ($Project in $Projects) {
 $DropDownBox.add_SelectedIndexChanged($handler_DropDownBox_SelectedIndexChanged)
 $form1.Controls.Add($DropDownBox)
 
+
+$checkBox10.UseVisualStyleBackColor = $True
+$System_Drawing_Size = New-Object System.Drawing.Size
+$System_Drawing_Size.Width = 104
+$System_Drawing_Size.Height = 24
+$checkBox10.Size = $System_Drawing_Size
+$checkBox10.TabIndex = 11
+$checkBox10.Text = "Update BIOS"
+$System_Drawing_Point = New-Object System.Drawing.Point
+$System_Drawing_Point.X = 27
+$System_Drawing_Point.Y = 298
+$checkBox10.Location = $System_Drawing_Point
+$checkBox10.DataBindings.DefaultDataSourceUpdateMode = 0
+$checkBox10.Name = "checkBox10"
+
+$form1.Controls.Add($checkBox10)
+
+
+
 $checkBox9.UseVisualStyleBackColor = $True
 $System_Drawing_Size = New-Object System.Drawing.Size
 $System_Drawing_Size.Width = 104
 $System_Drawing_Size.Height = 24
 $checkBox9.Size = $System_Drawing_Size
 $checkBox9.TabIndex = 10
-$checkBox9.Text = "Update BIOS"
+$checkBox9.Text = "Install SsLVpn"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
 $System_Drawing_Point.Y = 267
@@ -481,7 +532,7 @@ $System_Drawing_Size.Width = 104
 $System_Drawing_Size.Height = 24
 $checkBox8.Size = $System_Drawing_Size
 $checkBox8.TabIndex = 9
-$checkBox8.Text = "Install Verint"
+$checkBox8.Text = "Instal Verint"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
 $System_Drawing_Point.Y = 235
@@ -517,7 +568,7 @@ $System_Drawing_Size.Width = 104
 $System_Drawing_Size.Height = 24
 $checkBox6.Size = $System_Drawing_Size
 $checkBox6.TabIndex = 7
-$checkBox6.Text = "InstalAmazon"
+$checkBox6.Text = "InstallAmazon"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
 $System_Drawing_Point.Y = 173
