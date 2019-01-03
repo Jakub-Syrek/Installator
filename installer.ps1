@@ -2,7 +2,7 @@ $ScriptFolder = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 function Restart-PowerShell-Elevated
 {
-$Script = $ScriptFolder + "\DellBIOSproForm+qp.ps1"
+$Script = $ScriptFolder + "\installer.ps1"
 $ConfirmPreference = “None”
 If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
 {   
