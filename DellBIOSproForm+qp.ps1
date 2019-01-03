@@ -1,4 +1,3 @@
-
 $ScriptFolder = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 function Restart-PowerShell-Elevated
@@ -22,20 +21,32 @@ $ScriptFolder
 
 Function  UnblockComponents 
         {
-         dir $ScriptFolder | Unblock-File 
+         Get-ChildItem $ScriptFolder | Unblock-File 
         }
 
 
 
 Function InstallDellModules 
         {
-         Install-Module -Name DellBIOSProvider -RequiredVersion 2.0.0 ;
-         $FileName = $ScriptFolder + "\" + "Systems-Management_Application_G25RF_WN_8.2.0_A00" ;
-         Invoke-Command  -ScriptBlock {
+         if (Get-Module -ListAvailable -Name DellBIOSProvider) 
+         {
+           Write-Host "Module DellBIOSProvider exists"
+           Write-Host "Skipping modules installation."
+         } 
+         else 
+         {
+          Write-Host "Module does not exist"
+          Write-Host "Installing modules."
+          Install-Module -Name DellBIOSProvider -RequiredVersion 2.0.0 ;
+          $FileName = $ScriptFolder + "\" + "Systems-Management_Application_G25RF_WN_8.2.0_A00" ;
+          Invoke-Command  -ScriptBlock {
                                        Start-Process $FileName  -ArgumentList '/s' -Wait 
                                       }
-         Import-Module DellBIOSProvider  ;
-         Write-Host "OMCI Modules installed" ;
+          Write-Host "OMCI Modules installed" ;
+         }
+         
+         Import-Module DellBIOSProvider | Out-Null ;  
+              
         }
 
 Function ModifyBIOSvalues 
@@ -246,7 +257,31 @@ Set-Alias -Name iv -Value Install-Verint ;
     return $x86 -or $x64;
 }       
 
+function Get-Current-Status
+{
+ $listBox1.Items.Clear();
 
+ [array]$status = @("Chrome","Citrix","VMware","Amazon","QuikPop+","Impact 360 Desktop Applications","FortiClient") ;
+ [array]$checboxes = @($checkBox1 , $checkBox2 , $checkBox3 , $checkBox6 , $checkBox7 , $checkBox8 , $checkBox9 ) ;
+ for ($i = 0 ; $i -le $status.Count -1 ; $i++ )
+  {
+   if (Is-Installed $status[$i] )
+    {
+     $b = $($status[$i]) + " is already installed"
+     $listBox1.Items.Add("$($b)");
+     $a = $($checboxes[$i]) ;
+     $($a).Checked = $true ;
+    }
+    else
+    {
+     $b = "$($status[$i]) is not installed"
+     $listBox1.Items.Add($b);
+    }
+
+  }
+
+
+}
 
 
 
@@ -263,6 +298,7 @@ function GenerateForm {
 
 $form1 = New-Object System.Windows.Forms.Form 
 $button1 = New-Object System.Windows.Forms.Button
+$button2 = New-Object System.Windows.Forms.Button
 $listBox1 = New-Object System.Windows.Forms.ListBox
 $DropDownBox = New-Object System.Windows.Forms.ComboBox
 $checkBox10 = New-Object System.Windows.Forms.CheckBox
@@ -347,7 +383,10 @@ $handler_button1_Click=
     if ( !$checkBox1.Checked -and !$checkBox2.Checked -and !$checkBox3.Checked -and !$checkBox4.Checked -and !$checkBox5.Checked -and !$checkBox6.Checked -and !$checkBox7.Checked -and !$checkBox8.Checked -and !$checkBox9.Checked)
      {   $listBox1.Items.Add("No CheckBox selected....")} 
 }
-
+$handler_button2_Click= 
+{
+ Get-Current-Status ;
+}
 $handler_DropDownBox_SelectedIndexChanged=
 {
 
@@ -446,21 +485,39 @@ $form1.ClientSize = $System_Drawing_Size
 $button1.TabIndex = 4
 $button1.Name = "button1"
 $System_Drawing_Size = New-Object System.Drawing.Size
-$System_Drawing_Size.Width = 75
+$System_Drawing_Size.Width = 100
 $System_Drawing_Size.Height = 23
 $button1.Size = $System_Drawing_Size
 $button1.UseVisualStyleBackColor = $True
-
 $button1.Text = "Run Script"
-
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
 $System_Drawing_Point.Y = 360
 $button1.Location = $System_Drawing_Point
 $button1.DataBindings.DefaultDataSourceUpdateMode = 0
 $button1.add_Click($handler_button1_Click)
-
 $form1.Controls.Add($button1)
+
+
+
+
+$button2.TabIndex = 12
+$button2.Name = "button2"
+$System_Drawing_Size = New-Object System.Drawing.Size
+$System_Drawing_Size.Width = 120
+$System_Drawing_Size.Height = 23
+$button2.Size = $System_Drawing_Size
+$button2.UseVisualStyleBackColor = $True
+$button2.Text = "Check install status"
+$System_Drawing_Point = New-Object System.Drawing.Point
+$System_Drawing_Point.X = 128
+$System_Drawing_Point.Y = 360
+$button2.Location = $System_Drawing_Point
+$button2.DataBindings.DefaultDataSourceUpdateMode = 0
+$button2.add_Click($handler_button2_Click)
+$form1.Controls.Add($button2)
+
+
 
 $listBox1.FormattingEnabled = $True
 $System_Drawing_Size = New-Object System.Drawing.Size
@@ -474,20 +531,15 @@ $System_Drawing_Point.X = 147
 $System_Drawing_Point.Y = 13
 $listBox1.Location = $System_Drawing_Point
 $listBox1.TabIndex = 3
-
 $form1.Controls.Add($listBox1)
 
 $DropDownBox.Location = New-Object System.Drawing.Size(24,329) 
 $DropDownBox.Size = New-Object System.Drawing.Size(180,20) 
 $DropDownBox.DropDownHeight = 200 
-
-
 $Projects=@("Alstom","BD","DB" ,"Havi","Sasol")
-
 foreach ($Project in $Projects) {
                       $DropDownBox.Items.Add($Project)
                               }     
-
 $DropDownBox.add_SelectedIndexChanged($handler_DropDownBox_SelectedIndexChanged)
 $form1.Controls.Add($DropDownBox)
 
