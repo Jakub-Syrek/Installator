@@ -1,8 +1,9 @@
+
 $ScriptFolder = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 function Restart-PowerShell-Elevated
 {
-$Script = $ScriptFolder + "\installer.ps1"
+$Script = $ScriptFolder + "\InstallatorHCL.ps1"
 $ConfirmPreference = “None”
 If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
 {   
@@ -21,32 +22,53 @@ $ScriptFolder
 
 Function  UnblockComponents 
         {
-         Get-ChildItem $ScriptFolder | Unblock-File 
+         dir $ScriptFolder | Unblock-File 
         }
 
 
 
 Function InstallDellModules 
+
         {
+
          if (Get-Module -ListAvailable -Name DellBIOSProvider) 
+
          {
+
            Write-Host "Module DellBIOSProvider exists"
+
            Write-Host "Skipping modules installation."
+
          } 
+
          else 
+
          {
+
           Write-Host "Module does not exist"
+
           Write-Host "Installing modules."
+
           Install-Module -Name DellBIOSProvider -RequiredVersion 2.0.0 ;
+
           $FileName = $ScriptFolder + "\" + "Systems-Management_Application_G25RF_WN_8.2.0_A00" ;
+
           Invoke-Command  -ScriptBlock {
+
                                        Start-Process $FileName  -ArgumentList '/s' -Wait 
+
                                       }
+
           Write-Host "OMCI Modules installed" ;
+
          }
+
          
+
          Import-Module DellBIOSProvider | Out-Null ;  
+
               
+
         }
 
 Function ModifyBIOSvalues 
@@ -193,6 +215,23 @@ Function InstallVMware
               $listBox1.Items.Add("VMware is installed");
             }
         }
+Function InstallFirefox
+        {
+         if ((Is-Installed("Firefox")) -eq $false )
+            {
+             $FileName = $ScriptFolder + "\" + "Firefox.exe"
+             Invoke-Command  -ScriptBlock {
+                                          $args = " /s " ; #-ms /install
+                                          Start-Process $FileName  -ArgumentList $args -Wait 
+                                         }
+            }
+
+            if (Is-Installed("Firefox") -eq $true )
+            {
+              Write-Output "Firefox is installed"
+              $listBox1.Items.Add("Firefox is installed");
+            }
+        }
 Function InstallChrome 
         {
          if ((Is-Installed("Chrome")) -eq $false )
@@ -258,12 +297,13 @@ Set-Alias -Name iv -Value Install-Verint ;
 }       
 
 function Get-Current-Status
+
 {
  $listBox1.Items.Clear();
+ [array]$status = @("Chrome","Citrix","VMware","Amazon","QuikPop+","Impact 360 Desktop Applications","FortiClient" , "Firefox") ;
+ [array]$checboxes = @($checkBox1 , $checkBox2 , $checkBox3 , $checkBox6 , $checkBox7 , $checkBox8 , $checkBox9 , $checkBox10  ) ;
 
- [array]$status = @("Chrome","Citrix","VMware","Amazon","QuikPop+","Impact 360 Desktop Applications","FortiClient") ;
- [array]$checboxes = @($checkBox1 , $checkBox2 , $checkBox3 , $checkBox6 , $checkBox7 , $checkBox8 , $checkBox9 ) ;
- for ($i = 0 ; $i -le $status.Count -1 ; $i++ )
+  for ($i = 0 ; $i -le $status.Count -1 ; $i++ )
   {
    if (Is-Installed $status[$i] )
     {
@@ -277,10 +317,7 @@ function Get-Current-Status
      $b = "$($status[$i]) is not installed"
      $listBox1.Items.Add($b);
     }
-
   }
-
-
 }
 
 
@@ -301,6 +338,7 @@ $button1 = New-Object System.Windows.Forms.Button
 $button2 = New-Object System.Windows.Forms.Button
 $listBox1 = New-Object System.Windows.Forms.ListBox
 $DropDownBox = New-Object System.Windows.Forms.ComboBox
+$checkBox11 = New-Object System.Windows.Forms.CheckBox
 $checkBox10 = New-Object System.Windows.Forms.CheckBox
 $checkBox9 = New-Object System.Windows.Forms.CheckBox
 $checkBox8 = New-Object System.Windows.Forms.CheckBox
@@ -377,15 +415,23 @@ $handler_button1_Click=
     if ($checkBox10.Checked)
     {
          $listBox1.Items.Add( "Checkbox 10 is checked"  );
+         InstallFirefox ;
+    }
+    if ($checkBox11.Checked)
+    {
+         $listBox1.Items.Add( "Checkbox 11 is checked"  );
          UpdateBios ;
     }
 
-    if ( !$checkBox1.Checked -and !$checkBox2.Checked -and !$checkBox3.Checked -and !$checkBox4.Checked -and !$checkBox5.Checked -and !$checkBox6.Checked -and !$checkBox7.Checked -and !$checkBox8.Checked -and !$checkBox9.Checked)
+    if ( !$checkBox1.Checked -and !$checkBox2.Checked -and !$checkBox3.Checked -and !$checkBox4.Checked -and !$checkBox5.Checked -and !$checkBox6.Checked -and !$checkBox7.Checked -and !$checkBox8.Checked -and !$checkBox9.Checked -and !$checkBox10.Checked -and !$checkBox11.Checked)
      {   $listBox1.Items.Add("No CheckBox selected....")} 
 }
 $handler_button2_Click= 
+
 {
+
  Get-Current-Status ;
+
 }
 $handler_DropDownBox_SelectedIndexChanged=
 {
@@ -407,7 +453,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox7.Checked = $false ;
    $checkBox8.Checked = $false ;
    $checkBox9.Checked = $false ;
-   $checkBox10.Checked = $true ;
+   $checkBox10.Checked = $false ;
+   $checkBox11.Checked = $true ;
    }
 
         if ($Global:project -eq "BD")
@@ -421,7 +468,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox7.Checked = $false ;
    $checkBox8.Checked = $false ;
    $checkBox9.Checked = $false ;
-   $checkBox10.Checked = $true ;
+   $checkBox10.Checked = $false ;
+   $checkBox11.Checked = $true ;
    }
  
    if ($Global:project -eq "DB")
@@ -435,7 +483,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox7.Checked = $true ;
    $checkBox8.Checked = $false ;
    $checkBox9.Checked = $false ;
-   $checkBox10.Checked = $true ;
+   $checkBox10.Checked = $false ;
+   $checkBox11.Checked = $true ;
    }
    if ($Global:project -eq "Havi")
   {
@@ -448,7 +497,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox7.Checked = $false ;
    $checkBox8.Checked = $false ;
    $checkBox9.Checked = $false ;
-   $checkBox10.Checked = $true ;
+   $checkBox10.Checked = $false ;
+   $checkBox11.Checked = $true ;
    }
      if ($Global:project -eq "Sasol")
   {
@@ -461,7 +511,8 @@ $handler_DropDownBox_SelectedIndexChanged=
    $checkBox7.Checked = $false ;
    $checkBox8.Checked = $false ;
    $checkBox9.Checked = $true ;
-   $checkBox10.Checked = $true ;
+   $checkBox10.Checked = $false ;
+   $checkBox11.Checked = $true ;
    }
   }  
  }
@@ -478,8 +529,8 @@ $form1.Text = "Installator"
 $form1.Name = "Installator"
 $form1.DataBindings.DefaultDataSourceUpdateMode = 0
 $System_Drawing_Size = New-Object System.Drawing.Size
-$System_Drawing_Size.Width = 450
-$System_Drawing_Size.Height = 400
+$System_Drawing_Size.Width = 550
+$System_Drawing_Size.Height = 500
 $form1.ClientSize = $System_Drawing_Size
 
 $button1.TabIndex = 4
@@ -492,16 +543,13 @@ $button1.UseVisualStyleBackColor = $True
 $button1.Text = "Run Script"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
-$System_Drawing_Point.Y = 360
+$System_Drawing_Point.Y = 391
 $button1.Location = $System_Drawing_Point
 $button1.DataBindings.DefaultDataSourceUpdateMode = 0
 $button1.add_Click($handler_button1_Click)
 $form1.Controls.Add($button1)
 
-
-
-
-$button2.TabIndex = 12
+$button2.TabIndex = 13
 $button2.Name = "button2"
 $System_Drawing_Size = New-Object System.Drawing.Size
 $System_Drawing_Size.Width = 120
@@ -511,11 +559,13 @@ $button2.UseVisualStyleBackColor = $True
 $button2.Text = "Check install status"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 128
-$System_Drawing_Point.Y = 360
+$System_Drawing_Point.Y = 391
 $button2.Location = $System_Drawing_Point
 $button2.DataBindings.DefaultDataSourceUpdateMode = 0
 $button2.add_Click($handler_button2_Click)
 $form1.Controls.Add($button2)
+
+
 
 
 
@@ -531,18 +581,38 @@ $System_Drawing_Point.X = 147
 $System_Drawing_Point.Y = 13
 $listBox1.Location = $System_Drawing_Point
 $listBox1.TabIndex = 3
+
 $form1.Controls.Add($listBox1)
 
-$DropDownBox.Location = New-Object System.Drawing.Size(24,329) 
+$DropDownBox.Location = New-Object System.Drawing.Size(24,360) 
 $DropDownBox.Size = New-Object System.Drawing.Size(180,20) 
 $DropDownBox.DropDownHeight = 200 
+
+
 $Projects=@("Alstom","BD","DB" ,"Havi","Sasol")
+
 foreach ($Project in $Projects) {
                       $DropDownBox.Items.Add($Project)
                               }     
+
 $DropDownBox.add_SelectedIndexChanged($handler_DropDownBox_SelectedIndexChanged)
 $form1.Controls.Add($DropDownBox)
 
+$checkBox11.UseVisualStyleBackColor = $True
+$System_Drawing_Size = New-Object System.Drawing.Size
+$System_Drawing_Size.Width = 104
+$System_Drawing_Size.Height = 24
+$checkBox11.Size = $System_Drawing_Size
+$checkBox11.TabIndex = 12
+$checkBox11.Text = "Update BIOS"
+$System_Drawing_Point = New-Object System.Drawing.Point
+$System_Drawing_Point.X = 27
+$System_Drawing_Point.Y = 329
+$checkBox11.Location = $System_Drawing_Point
+$checkBox11.DataBindings.DefaultDataSourceUpdateMode = 0
+$checkBox11.Name = "checkBox11"
+
+$form1.Controls.Add($checkBox11)
 
 $checkBox10.UseVisualStyleBackColor = $True
 $System_Drawing_Size = New-Object System.Drawing.Size
@@ -550,7 +620,7 @@ $System_Drawing_Size.Width = 104
 $System_Drawing_Size.Height = 24
 $checkBox10.Size = $System_Drawing_Size
 $checkBox10.TabIndex = 11
-$checkBox10.Text = "Update BIOS"
+$checkBox10.Text = "Install Firefox"
 $System_Drawing_Point = New-Object System.Drawing.Point
 $System_Drawing_Point.X = 27
 $System_Drawing_Point.Y = 298
